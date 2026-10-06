@@ -1,31 +1,450 @@
 <!doctype html>
-<html lang="ru" data-stub>
+<html lang="ru">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Новостной сайт с ИИ-агентом · демо готовится</title>
-<meta name="robots" content="noindex">
-<meta http-equiv="refresh" content="120">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Сводка · новости, которые собирает ИИ-агент</title>
+<meta name="description" content="Новостной сайт на автопилоте: ИИ-агент сам находит новости, проверяет их по нескольким источникам, пересказывает и публикует. Есть форма обратной связи.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Сводка · новости, которые собирает ИИ-агент">
+<meta property="og:description" content="Новостной сайт на автопилоте: ИИ-агент сам находит, проверяет и публикует новости.">
+<meta property="og:url" content="https://web-atelie.ru/ai-novosti/">
+<meta property="og:image" content="https://web-atelie.ru/ai-novosti/assets/og.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23FF6A3D'/%3E%3Cpath d='M9 22V10h9a4 4 0 0 1 0 8h-6' stroke='%23121416' stroke-width='3.2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Manrope:wght@400;600&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@1,700&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"NewsMediaOrganization","name":"Сводка","url":"https://web-atelie.ru/ai-novosti/","description":"Демо новостного сайта, который наполняет ИИ-агент"}</script>
 <style>
-:root{--bg:#F6F3EE;--ink:#1F1E1C;--muted:#6B655C;--acc:#8A6737}
-@media (prefers-color-scheme:dark){:root{--bg:#161615;--ink:#EDE7DC;--muted:#A9A195;--acc:#C9A66B}}
-*{box-sizing:border-box}html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Manrope,system-ui,sans-serif;display:grid;place-items:center;padding:24px}
-main{max-width:560px;text-align:center;display:flex;flex-direction:column;gap:18px;align-items:center}
-.k{font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--acc);font-weight:600}
-h1{font:500 clamp(2rem,6vw,3rem)/1.1 "Cormorant Garamond",Georgia,serif;margin:0;text-wrap:balance}
-p{margin:0;color:var(--muted)}
-.bar{width:220px;height:3px;background:color-mix(in srgb,var(--acc) 20%,transparent);border-radius:3px;overflow:hidden}
-.bar i{display:block;height:100%;width:40%;background:var(--acc);animation:m 1.6s ease-in-out infinite}
-@keyframes m{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
-@media (prefers-reduced-motion:reduce){.bar i{animation:none;width:60%}}
+:root{
+  --bg:#111315; --surface:#1A1D20; --surface2:#22262A; --line:#2E3338;
+  --ink:#ECE8E1; --soft:#A7A39C; --acc:#FF6A3D; --acc-ink:#121416; --ok:#46D18A;
+  --r:14px; --wrap:1200px;
+  --f-d:"Unbounded",system-ui,sans-serif; --f-t:"Onest",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--f-t);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 20px}
+h1,h2,h3{font-family:var(--f-d);font-weight:700;line-height:1.2;margin:0;letter-spacing:-.01em}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+
+/* шапка */
+.top{position:sticky;top:0;z-index:20;background:rgb(17 19 21 / .92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top__in{display:flex;align-items:center;gap:24px;height:64px}
+.logo{font-family:var(--f-d);font-weight:700;font-size:22px;text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo i{width:30px;height:30px;border-radius:8px;background:var(--acc);display:grid;place-items:center;font-style:normal;color:var(--acc-ink);font-size:16px}
+.nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav a{text-decoration:none;color:var(--soft);font-size:14px;padding:8px 12px;border-radius:999px;white-space:nowrap}
+.nav a:hover{color:var(--ink);background:var(--surface)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--acc);color:var(--acc-ink);border:0;border-radius:999px;padding:11px 20px;font-weight:600;font-size:15px;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}
+
+/* бегущая строка */
+.ticker{border-bottom:1px solid var(--line);background:var(--surface);overflow:hidden;font-size:14px}
+.ticker__in{display:flex;align-items:center;height:40px}
+.ticker__tag{flex:none;background:var(--acc);color:var(--acc-ink);font-weight:600;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:6px;margin-right:16px}
+.ticker__run{overflow:hidden;flex:1;mask-image:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+.ticker__line{display:inline-flex;gap:48px;white-space:nowrap;animation:run 60s linear infinite;padding-left:20px}
+.ticker__line span::before{content:"●";color:var(--acc);margin-right:10px;font-size:9px;vertical-align:2px}
+@keyframes run{to{transform:translateX(-50%)}}
+
+/* статус агента */
+.status{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:center;padding:18px 0 0;color:var(--soft);font-size:14px}
+.status b{color:var(--ink);font-weight:600}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ok);margin-right:8px;box-shadow:0 0 0 0 rgb(70 209 138 / .6);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 9px rgb(70 209 138 / 0)}100%{box-shadow:0 0 0 0 rgb(70 209 138 / 0)}}
+
+/* главная новость */
+.lead{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:28px;padding:22px 0 56px}
+.hero{position:relative;border-radius:var(--r);overflow:hidden;min-height:460px;display:flex;align-items:flex-end;cursor:pointer}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgb(0 0 0 / 0) 30%,rgb(0 0 0 / .85))}
+.hero__txt{position:relative;z-index:1;padding:32px;max-width:720px}
+.hero h1{font-size:clamp(26px,3.2vw,40px);margin:12px 0 12px}
+.hero p{margin:0;color:#DAD5CD;font-size:17px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--acc)}
+.ai{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--soft);border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:rgb(17 19 21 / .6)}
+.ai::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.hour{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px;display:flex;flex-direction:column}
+.hour h2{font-size:18px;margin-bottom:6px}
+.hour ol{list-style:none;margin:0;padding:0;counter-reset:n}
+.hour li{counter-increment:n;display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;padding:14px 0;border-top:1px solid var(--line);cursor:pointer}
+.hour li:first-child{border-top:0}
+.hour li::before{content:counter(n);font-family:var(--f-d);color:var(--acc);font-size:15px}
+.hour li:hover strong{text-decoration:underline;text-underline-offset:.2em}
+.hour strong{display:block;font-weight:600;line-height:1.4}
+.hour small{color:var(--soft);font-size:13px}
+
+/* лента */
+.sec{padding:64px 0;border-top:1px solid var(--line)}
+.sec__head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:16px;margin-bottom:28px}
+.sec h2{font-size:clamp(24px,2.6vw,32px)}
+.sec__sub{color:var(--soft);margin:8px 0 0;max-width:560px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px}
+.tab{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer;color:var(--soft)}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .2s,border-color .2s}
+.card[hidden]{display:none}
+.card:hover{transform:translateY(-3px);border-color:#454B52}
+.card img{aspect-ratio:3/2;object-fit:cover;width:100%}
+.card__b{padding:18px 20px 20px;display:flex;flex-direction:column;gap:10px;flex:1}
+.card h3{font-family:var(--f-t);font-weight:600;font-size:18px;line-height:1.35}
+.card p{margin:0;color:var(--soft);font-size:15px}
+.card__meta{margin-top:auto;display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--soft);font-size:13px;padding-top:6px}
+.card--new{animation:appear .8s ease}
+.card--new .card__b::before{content:"Только что";align-self:flex-start;background:var(--acc);color:var(--acc-ink);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:5px}
+@keyframes appear{from{opacity:0;transform:translateY(-14px)}}
+
+/* пульт агента */
+.agent{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:28px;align-items:start}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:24px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.stat b{display:block;font-family:var(--f-d);font-size:28px;color:var(--ink)}
+.stat span{color:var(--soft);font-size:14px}
+.mode{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.mode p{margin:0;font-size:14px;color:var(--soft);flex:1;min-width:200px}
+.mode p b{color:var(--ink)}
+.switch{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:3px}
+.switch button{border:0;background:none;padding:7px 14px;border-radius:999px;font-size:14px;cursor:pointer;color:var(--soft)}
+.switch button[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink);font-weight:600}
+.console{background:#0B0C0E;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.console__bar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13px;color:var(--soft)}
+.console__bar i{width:10px;height:10px;border-radius:50%;background:#3A3F45}
+.console__bar span{margin-left:8px}
+.log{list-style:none;margin:0;padding:14px 16px;height:380px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:7px;font:13px/1.5 ui-monospace,"Cascadia Mono",Consolas,monospace}
+.log li{color:#C9C4BC;animation:appear .4s ease}
+.log time{color:#6F757C;margin-right:10px}
+.log .k-find{color:#7FB8FF}.log .k-check{color:#E6C15A}.log .k-pub{color:var(--ok)}.log .k-skip{color:#8A8F95}
+
+/* как работает */
+.steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;counter-reset:s}
+.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px;counter-increment:s}
+.step::before{content:"0" counter(s);font-family:var(--f-d);color:var(--acc);font-size:14px;display:block;margin-bottom:18px}
+.step h3{font-size:17px;margin-bottom:10px}
+.step p{margin:0;color:var(--soft);font-size:15px}
+
+/* обратная связь */
+.fb{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:40px;align-items:start}
+.fb ul{margin:22px 0 0;padding:0;list-style:none;display:grid;gap:12px;color:var(--soft)}
+.fb li{padding-left:26px;position:relative}
+.fb li::before{content:"→";position:absolute;left:0;color:var(--acc)}
+.form{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px;display:grid;gap:16px}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+label{display:grid;gap:6px;font-size:14px;color:var(--soft)}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;width:100%;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--acc)}
+textarea{min-height:120px;resize:vertical}
+.form small{color:var(--soft);font-size:13px}
+.ok{display:none;background:rgb(70 209 138 / .1);border:1px solid rgb(70 209 138 / .4);color:var(--ink);padding:14px 16px;border-radius:10px;font-size:15px}
+.ok.is-on{display:block}
+
+/* окно статьи */
+.modal{position:fixed;inset:0;z-index:50;background:rgb(0 0 0 / .7);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.modal.is-on{display:flex}
+.modal__box{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);max-width:760px;width:100%;overflow:hidden;position:relative}
+.modal__box img{width:100%;aspect-ratio:16/8;object-fit:cover}
+.modal__in{padding:28px 32px 32px}
+.modal h2{font-size:clamp(22px,2.6vw,30px);margin:12px 0 16px}
+.modal p{color:#D4CFC7;margin:0 0 14px}
+.src{margin-top:18px;padding:16px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font-size:14px;color:var(--soft)}
+.src b{color:var(--ink)}
+.x{position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;border:0;background:rgb(17 19 21 / .8);color:var(--ink);font-size:22px;cursor:pointer;z-index:1}
+
+/* подвал */
+.foot{border-top:1px solid var(--line);padding:28px 20px 36px;max-width:var(--wrap);margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;align-items:center;color:var(--soft);font-size:14px}
+.foot__name{font-family:var(--f-d);font-weight:700;color:var(--ink);font-size:18px}
+.foot__demo{flex-basis:100%;font-size:13px}
+/* подпись разработчика в подвале: «Создан в «Веб-Ателье»» – одинаковая на всех сайтах, не менять */
+.foot__made{display:inline-block;white-space:nowrap;font-style:italic;font-size:14px;line-height:1.4;color:var(--soft);padding:.4em 0}
+.foot__made a{display:inline;margin:0 0 0 .3em;color:inherit;text-decoration:none;font-family:Calibri,"Carlito",sans-serif;font-weight:700;font-style:italic;font-size:1.12em}
+.foot__made a:hover{color:var(--ink);text-decoration:underline;text-underline-offset:.18em}
+.foot__made img{display:inline-block;width:40px;height:52px;max-width:none;margin-left:.35em;vertical-align:-7px}
+
+@media (max-width:1000px){
+  .lead,.agent,.fb{grid-template-columns:minmax(0,1fr)}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:720px){
+  .top__in{gap:12px}
+  .nav{display:none}
+  .top .btn{margin-left:auto;padding:9px 16px;font-size:14px}
+  .hero{min-height:420px}
+  .hero__txt{padding:22px}
+  .hero p{font-size:15px}
+  .grid,.steps,.row{grid-template-columns:minmax(0,1fr)}
+  .sec{padding:48px 0}
+  .form{padding:20px}
+  .log{height:320px;font-size:12px}
+  .modal{padding:0}
+  .modal__box{border-radius:0;min-height:100%}
+  .modal__in{padding:22px 20px 28px}
+  .foot__made{font-size:1rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  html{scroll-behavior:auto}
+}
 </style>
 </head>
-<body><main>
-<div class="k">Демо-версия по вашему ТЗ</div>
-<h1>Новостной сайт с ИИ-агентом</h1>
-<div class="bar" aria-hidden="true"><i></i></div>
-<p>Сайт сейчас собирается по вашему техническому заданию.<br>Будет готов сегодня к <b>13:00</b> – по этой же ссылке.</p>
-<p style="font-size:.85rem">Страница обновится сама.</p>
-</main></body></html>
+<body>
+
+<header class="top">
+  <div class="wrap top__in">
+    <a class="logo" href="#"><i>С</i>Сводка</a>
+    <nav class="nav" aria-label="Рубрики">
+      <a href="#lenta" data-go="Город">Город</a>
+      <a href="#lenta" data-go="Экономика">Экономика</a>
+      <a href="#lenta" data-go="Технологии">Технологии</a>
+      <a href="#lenta" data-go="Спорт">Спорт</a>
+      <a href="#lenta" data-go="Культура">Культура</a>
+      <a href="#lenta" data-go="Природа">Природа</a>
+    </nav>
+    <a class="btn" href="#svyaz">Обратная связь</a>
+  </div>
+</header>
+
+<div class="ticker" aria-label="Срочные новости">
+  <div class="wrap ticker__in">
+    <span class="ticker__tag">Молния</span>
+    <div class="ticker__run"><div class="ticker__line" id="ticker"></div></div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+    <div class="status">
+      <span><i class="dot"></i><b>ИИ-агент на связи</b></span>
+      <span>Последняя публикация: <b id="last">2 мин назад</b></span>
+      <span>Сегодня опубликовано: <b id="today">37</b></span>
+      <span>Источников отслеживается: <b>124</b></span>
+    </div>
+
+    <section class="lead">
+      <article class="hero" tabindex="0">
+        <img src="assets/city.webp" alt="Вечерний город у реки" width="1600" height="900" fetchpriority="high">
+        <div class="hero__txt">
+          <span class="chip">Город</span> <span class="ai">Собрано ИИ · 5 источников</span>
+          <h1>Набережную откроют для пешеходов по выходным до конца октября</h1>
+          <p>Движение машин перекроют по субботам и воскресеньям с 10:00 до 22:00. Объезд – по параллельной улице, автобусы пойдут по временной схеме.</p>
+        </div>
+      </article>
+      <aside class="hour">
+        <h2>Главное за час</h2>
+        <ol id="hour"></ol>
+      </aside>
+    </section>
+  </div>
+
+  <section class="sec" id="lenta">
+    <div class="wrap">
+      <div class="sec__head">
+        <div>
+          <h2>Лента новостей</h2>
+          <p class="sec__sub">Новые материалы появляются сами – агент публикует их, как только проверит факты. Подождите полминуты на этой странице.</p>
+        </div>
+        <div class="tabs" id="tabs" role="group" aria-label="Фильтр по рубрикам"></div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="agent">
+    <div class="wrap agent">
+      <div>
+        <h2>Пульт ИИ-агента</h2>
+        <p class="sec__sub">Так выглядит работа агента изнутри: он круглосуточно читает источники, отсеивает дубли и рекламу, сверяет факты и выпускает заметку на сайт.</p>
+        <div class="stats">
+          <div class="stat"><b>124</b><span>источника: сайты ведомств, СМИ, Telegram-каналы</span></div>
+          <div class="stat"><b>3+</b><span>источника нужно, чтобы факт попал в новость</span></div>
+          <div class="stat"><b>~15 мин</b><span>от первого сообщения до публикации</span></div>
+          <div class="stat"><b>0</b><span>копий чужих текстов – только пересказ своими словами</span></div>
+        </div>
+        <div class="mode">
+          <p id="modeText"><b>Автопилот:</b> агент публикует сам, редактор получает уведомление.</p>
+          <div class="switch" role="group" aria-label="Режим публикации">
+            <button type="button" data-mode="auto" aria-pressed="true">Автопилот</button>
+            <button type="button" data-mode="edit" aria-pressed="false">С редактором</button>
+          </div>
+        </div>
+      </div>
+      <div class="console">
+        <div class="console__bar"><i></i><i></i><i></i><span>журнал агента · в реальном времени</span></div>
+        <ul class="log" id="log"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="kak">
+    <div class="wrap">
+      <div class="sec__head">
+        <div>
+          <h2>Как сайт наполняется сам</h2>
+          <p class="sec__sub">Человеку остаётся задать темы и источники. Дальше агент работает по кругу каждые 15 минут.</p>
+        </div>
+      </div>
+      <div class="steps">
+        <div class="step"><h3>Сбор</h3><p>Читает заданные источники: RSS, сайты администрации и ведомств, новостные Telegram-каналы, пресс-релизы.</p></div>
+        <div class="step"><h3>Отбор</h3><p>Склеивает одинаковые сообщения, убирает рекламу и слухи. Если факт есть только в одном месте – ждёт подтверждения.</p></div>
+        <div class="step"><h3>Текст</h3><p>Пишет заметку своими словами: заголовок, лид, 3–5 абзацев, рубрику и теги. Подбирает фото с правами на использование.</p></div>
+        <div class="step"><h3>Публикация</h3><p>Выпускает материал на сайт и в ленту, ставит ссылки на источники. В режиме «С редактором» – сначала ждёт одобрения.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="svyaz">
+    <div class="wrap fb">
+      <div>
+        <h2>Обратная связь</h2>
+        <p class="sec__sub">Сообщения читает живой редактор, а не агент. Отвечаем в течение рабочего дня.</p>
+        <ul>
+          <li>Видели событие в городе – пришлите, проверим и опубликуем</li>
+          <li>Нашли ошибку в материале – исправим и отметим правку</li>
+          <li>Реклама и партнёрство – пришлём условия</li>
+        </ul>
+      </div>
+      <form class="form" id="form" novalidate>
+        <div class="row">
+          <label>Имя<input name="name" autocomplete="name" required placeholder="Как к вам обращаться"></label>
+          <label>Телефон или e-mail<input name="contact" required placeholder="+7 (900) 000-00-00"></label>
+        </div>
+        <label>Тема
+          <select name="topic">
+            <option>Сообщить новость</option>
+            <option>Ошибка в материале</option>
+            <option>Реклама и партнёрство</option>
+            <option>Другое</option>
+          </select>
+        </label>
+        <label>Сообщение<textarea name="msg" required placeholder="Что случилось, где и когда"></textarea></label>
+        <button class="btn" type="submit">Отправить редактору</button>
+        <small>В демо форма ничего не отправляет. На рабочем сайте сообщение придёт на почту или в Telegram редакции.</small>
+        <div class="ok" id="ok" role="status">Спасибо! Сообщение принято, редактор ответит в течение рабочего дня.</div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span class="foot__name">Сводка</span>
+  <span class="foot__made">Создан в <a href="https://web-atelie.ru/" target="_blank" rel="noopener">«Веб-Ателье»</a><img src="assets/web-atelie.png" alt="" width="40" height="52" loading="lazy" decoding="async"></span>
+  <span class="foot__demo">Демо-концепт новостного сайта с ИИ-агентом. Новости, цифры и названия условные, работа агента и отправка формы имитируются, фото – из стоковой библиотеки.</span>
+</footer>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="modal__box">
+    <button class="x" type="button" aria-label="Закрыть">×</button>
+    <img id="mImg" src="assets/city.webp" alt="">
+    <div class="modal__in">
+      <span class="chip" id="mCat"></span> <span class="ai" id="mAi"></span>
+      <h2 id="mTitle"></h2>
+      <div id="mText"></div>
+      <div class="src" id="mSrc"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const IMG={Город:'city',Экономика:'econ',Технологии:'tech',Спорт:'sport',Культура:'cult',Природа:'nature'};
+const NEWS=[
+ {c:'Город',t:'Набережную откроют для пешеходов по выходным до конца октября',l:'Движение машин перекроют по субботам и воскресеньям с 10:00 до 22:00.',m:2,s:5},
+ {c:'Экономика',t:'Средняя цена аренды однокомнатной квартиры за месяц выросла на 3%',l:'Сильнее всего подорожали квартиры рядом с метро и новыми школами.',m:14,s:4},
+ {c:'Технологии',t:'В городских поликлиниках запустили запись к врачу через чат-бот',l:'Бот работает круглосуточно и предлагает ближайшее свободное время.',m:21,s:3},
+ {c:'Спорт',t:'Местный клуб выиграл третий матч подряд и поднялся на 4-е место',l:'Решающий гол забили на 87-й минуте после углового.',m:33,s:4},
+ {c:'Культура',t:'Фестиваль уличной музыки соберёт 40 коллективов в центральном парке',l:'Вход свободный, сцены будут работать с полудня до 21:00.',m:47,s:3},
+ {c:'Природа',t:'Уровень воды в реке вернулся к норме после дождей',l:'Спасатели сняли ограничения для лодок и прогулочных катеров.',m:58,s:5},
+ {c:'Город',t:'На шести перекрёстках поставят светофоры с обратным отсчётом',l:'Работы начнут в ноябре, перекрытий движения не планируют.',m:72,s:3},
+ {c:'Экономика',t:'Городской рынок продлил часы работы до 20:00',l:'Новый график действует с понедельника и сохранится до весны.',m:95,s:3},
+ {c:'Технологии',t:'Бесплатный Wi-Fi появился ещё на 12 остановках',l:'Скорость – до 50 Мбит/с, вход по номеру телефона.',m:118,s:4}
+];
+const FRESH=[
+ {c:'Спорт',t:'Билеты на домашний матч в субботу раскупили за два часа',l:'Клуб обещает трансляцию на экране у входа на стадион.',s:3},
+ {c:'Город',t:'Летние веранды кафе разрешили оставить до 15 ноября',l:'Владельцы обязаны поставить обогреватели и навесы.',s:4},
+ {c:'Природа',t:'В парке высадят 300 молодых клёнов и лип',l:'Посадку проведут волонтёры в ближайшее воскресенье.',s:3},
+ {c:'Культура',t:'Городской музей откроет вечерние часы по четвергам',l:'По четвергам залы будут работать до 22:00, вход после 18:00 – со скидкой.',s:3},
+ {c:'Экономика',t:'Цены на овощи на рынках снизились второй месяц подряд',l:'Больше всего подешевели огурцы и капуста.',s:5}
+];
+const BODY=n=>[
+ `${n.l} Об этом сообщили сразу в нескольких источниках, агент сверил даты, цифры и место.`,
+ `Это пример заметки, которую ИИ-агент пишет сам: короткий заголовок, лид с главным фактом и несколько абзацев с подробностями. Текст не копирует источники – это пересказ своими словами.`,
+ `На рабочем сайте здесь будет полный текст новости, а внизу – ссылки на первоисточники. Если в материале найдут ошибку, редактор поправит его, и правка будет отмечена.`
+];
+const src=k=>k+' '+(k>=5?'источников':'источника');
+const ago=m=>m<1?'только что':m<60?m+' мин назад':Math.floor(m/60)+' ч '+(m%60?m%60+' мин ':'')+'назад';
+let cat='Все', mode='auto';
+const grid=document.getElementById('grid');
+function card(n,isNew){
+  const a=document.createElement('article');
+  a.className='card'+(isNew?' card--new':''); a.tabIndex=0; a.dataset.c=n.c;
+  a.innerHTML=`<img src="assets/${IMG[n.c]}.webp" alt="" width="900" height="600" loading="lazy"><div class="card__b"><span class="chip">${n.c}</span><h3>${n.t}</h3><p>${n.l}</p><div class="card__meta"><span>${ago(n.m)}</span><span>${src(n.s)}</span><span>собрано ИИ</span></div></div>`;
+  a.onclick=()=>show(n); a.onkeydown=e=>{if(e.key==='Enter')show(n)};
+  if(cat!=='Все'&&n.c!==cat)a.hidden=true;
+  return a;
+}
+NEWS.forEach(n=>grid.append(card(n)));
+const hour=document.getElementById('hour');
+NEWS.slice(1,6).forEach(n=>{const li=document.createElement('li');li.tabIndex=0;li.innerHTML=`<div><strong>${n.t}</strong><small>${n.c} · ${ago(n.m)}</small></div>`;li.onclick=()=>show(n);li.onkeydown=e=>{if(e.key==='Enter')show(n)};hour.append(li)});
+const hero=document.querySelector('.hero');
+hero.onclick=()=>show(NEWS[0]); hero.onkeydown=e=>{if(e.key==='Enter')show(NEWS[0])};
+const tk=['Набережную закроют для машин по выходным','Запись к врачу – теперь через чат-бот','Клуб выиграл третий матч подряд','40 коллективов на фестивале уличной музыки','Wi-Fi ещё на 12 остановках'];
+document.getElementById('ticker').innerHTML=[...tk,...tk].map(x=>`<span>${x}</span>`).join('');
+const tabs=document.getElementById('tabs');
+['Все',...Object.keys(IMG)].forEach(c=>{const b=document.createElement('button');b.type='button';b.className='tab';b.textContent=c;b.setAttribute('aria-pressed',c==='Все');b.onclick=()=>setCat(c);tabs.append(b)});
+function setCat(c){cat=c;tabs.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-pressed',b.textContent===c));grid.querySelectorAll('.card').forEach(a=>a.hidden=!(c==='Все'||a.dataset.c===c))}
+document.querySelectorAll('[data-go]').forEach(a=>a.addEventListener('click',()=>setCat(a.dataset.go)));
+const modal=document.getElementById('modal');
+function show(n){
+  document.getElementById('mImg').src=`assets/${IMG[n.c]}.webp`;
+  document.getElementById('mCat').textContent=n.c;
+  document.getElementById('mAi').textContent='Собрано ИИ · '+src(n.s);
+  document.getElementById('mTitle').textContent=n.t;
+  document.getElementById('mText').innerHTML=BODY(n).map(p=>`<p>${p}</p>`).join('');
+  document.getElementById('mSrc').innerHTML=`<b>Источники (${n.s}):</b> сайт администрации, городское СМИ, Telegram-канал ведомства. Факты сверены агентом ${ago(n.m||0)}.`;
+  modal.classList.add('is-on'); document.body.style.overflow='hidden'; modal.querySelector('.x').focus();
+}
+function hide(){modal.classList.remove('is-on');document.body.style.overflow=''}
+modal.addEventListener('click',e=>{if(e.target===modal||e.target.classList.contains('x'))hide()});
+addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
+const modeText=document.getElementById('modeText');
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;document.querySelectorAll('[data-mode]').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  modeText.innerHTML=mode==='auto'?'<b>Автопилот:</b> агент публикует сам, редактор получает уведомление.':'<b>С редактором:</b> агент готовит заметку, редактор одобряет её в один клик.'});
+const log=document.getElementById('log');
+const now=()=>new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+function line(k,txt){const li=document.createElement('li');li.innerHTML=`<time>${now()}</time><span class="k-${k}">${txt}</span>`;log.append(li);while(log.children.length>18)log.firstChild.remove()}
+const SCRIPT=[
+ ['find','Проверяю 124 источника…'],['find','Новых сообщений: 9'],['skip','Отброшено 3: реклама и повтор'],
+ ['skip','1 сообщение без подтверждения – жду второй источник'],['check','Склеиваю 5 сообщений об одном событии'],
+ ['check','Сверяю дату, место и цифры – совпадают в 4 источниках'],['check','Пишу заголовок и лид…'],['check','Подбираю фото и рубрику']
+];
+let si=0, fi=0, today=37, lastMin=2;
+SCRIPT.slice(0,6).forEach(x=>line(...x));
+function tick(){
+  if(si<SCRIPT.length){line(...SCRIPT[si]);si++;return}
+  si=0;
+  const n=FRESH[fi%FRESH.length];fi++;
+  if(mode==='edit'){line('pub',`Отправлено редактору на одобрение: «${n.t}»`);return}
+  line('pub',`Опубликовано: «${n.t}»`);
+  grid.prepend(card({...n,m:0},true));
+  while(grid.children.length>12)grid.lastChild.remove();
+  today++;lastMin=0;
+  document.getElementById('today').textContent=today;
+  document.getElementById('last').textContent='только что';
+}
+const slow=matchMedia('(prefers-reduced-motion: reduce)').matches;
+setInterval(tick,slow?6000:2600);
+setInterval(()=>{lastMin++;document.getElementById('last').textContent=ago(lastMin)},60000);
+document.getElementById('form').addEventListener('submit',e=>{
+  e.preventDefault();const f=e.target;let bad=false;
+  f.querySelectorAll('[required]').forEach(i=>{const no=!i.value.trim();i.style.borderColor=no?'var(--acc)':'';bad=bad||no});
+  if(bad)return;
+  document.getElementById('ok').classList.add('is-on');f.reset();
+});
+</script>
+</body>
+</html>
